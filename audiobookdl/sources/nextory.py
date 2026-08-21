@@ -2,6 +2,7 @@ from .source import Source
 from audiobookdl import AudiobookFile, Chapter, AudiobookMetadata, Cover, Audiobook, BookId, Result, Series, logging
 from audiobookdl.exceptions import DataNotPresent, AudiobookDLException, BookHasNoAudiobook, UserNotAuthorized, GenericAudiobookDLException
 from typing import Any, Optional, Dict, List, Union
+from io import BytesIO
 
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -9,6 +10,7 @@ import hashlib
 import uuid
 import platform
 import pycountry
+from PIL import Image
 
 
 def calculate_checksum(username: str, password: str, salt: str) -> str:
@@ -316,4 +318,14 @@ class NextorySource(Source):
     def get_cover(self, book_info) -> Cover:
         cover_url = self.find_format_data(book_info)["img_url"]
         cover_data = self.get(cover_url)
+
+        # Nextory returns WebP data even though the URL ends in .jpg.
+        # Convert the image to real JPEG bytes before embedding it.
+        image = Image.open(BytesIO(cover_data))
+        image = image.convert("RGB")
+
+        output = BytesIO()
+        image.save(output, format="JPEG", quality=95)
+        cover_data = output.getvalue()
+
         return Cover(cover_data, "jpg")
