@@ -8,7 +8,7 @@
 | eReolen          |    ✓    |         ✓         |                                                                                                |
 | Everand          |    ✓    |         ✗         | Used to be called Scribd                                                                       |
 | Librivox         |    ✗    |         ✗         | Authentication not required                                                                    |
-| Nextory          |    ✗    |         ✓         | Books must be in "Your Library" <br/>Only single (first) account supported                     |
+| Nextory          |    ✗    |         ✓         | Only single (first) account supported                                                          |
 | Overdrive        |    ✓    |         ✗         |                                                                                                |
 | Podimo           |    ✗    |         ✓         |                                                                                                |
 | Saxo             |    ✗    |         ✓         |                                                                                                |

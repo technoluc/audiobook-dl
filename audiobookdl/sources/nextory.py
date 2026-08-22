@@ -123,7 +123,7 @@ class NextorySource(Source):
 
 
     def download_from_id(self, book_id: int) -> Audiobook:
-        book_info = self.find_book_info(book_id, self._get_wantlist())
+        book_info = self._get_book_info(book_id)
         logging.debug(f"nextory book_info keys: {sorted(book_info.keys())}")
         audio_data = self.download_audio_data(book_info)
         if "files" not in audio_data:
@@ -166,6 +166,34 @@ class NextorySource(Source):
             title = "Nextory want to read",
             books = books,
         )
+
+
+    def _get_book_info(self, book_id: int) -> dict:
+        """Load product metadata without requiring the want-to-read list.
+
+        Nextory's discovery API returns the same payload as a shelf entry.
+        Fall back to the want-to-read list if discovery fails.
+        """
+        try:
+            return self._download_product(book_id)
+        except Exception as error:
+            logging.log(
+                f"Direct Nextory product lookup failed; trying want-to-read list: {error}"
+            )
+            return self.find_book_info(book_id, self._get_wantlist())
+
+
+    def _download_product(self, book_id: int) -> dict:
+        response = self._session.get(
+            f"https://api.nextory.com/discovery/v1/product/{book_id}"
+        )
+        response.raise_for_status()
+        book_info = response.json()
+        if book_info.get("id") != book_id or not isinstance(
+            book_info.get("formats"), list
+        ):
+            raise ValueError("Nextory returned invalid product metadata")
+        return book_info
 
 
     def find_book_info(self, book_id: int, want_to_read_list: list) -> dict:

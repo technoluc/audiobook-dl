@@ -1,3 +1,3 @@
-[red]ERROR: Book not found in want to read list[/]
+[red]ERROR: Could not load this Nextory book[/]
 
-Nextory books have to be added to your want to read list to be downloadable.
+Direct catalog lookup failed, and the book was not found in your want to read list.
