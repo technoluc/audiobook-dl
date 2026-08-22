@@ -11,7 +11,6 @@ MP4_CONVERT = {
     "authors": "artist",
     "narrators": "narrator",
     "publishers": "publisher",
-    "series": "album",
     "title": "title",
     "genres": "genre",
 }
@@ -27,6 +26,9 @@ EasyMP4Tags.RegisterTextKey("narrator", '\xa9nrt')
 EasyMP4Tags.RegisterTextKey("publisher", '\xa9pub')
 EasyMP4Tags.RegisterTextKey("track", '\xa9trk')
 EasyMP4Tags.RegisterFreeformKey("scrape_url", "URL")
+# Audiobookshelf reads these iTunes freeform atoms, not the album/track fields.
+EasyMP4Tags.RegisterFreeformKey("series", "series")
+EasyMP4Tags.RegisterFreeformKey("series-part", "series-part")
 
 def is_mp4_file(filepath: str) -> bool:
     """Returns true if `filepath` points to an id3 file"""
@@ -46,8 +48,11 @@ def add_mp4_metadata(filepath: str, metadata: AudiobookMetadata):
         elif key == "language":
             audio.tags.RegisterFreeformKey(key, key.capitalize()) # type: ignore
             audio["language"] = value.alpha_3
+        elif key == "series":
+            audio["series"] = value
         elif key == "series_order":
-            audio["track"] = str(value)
+            audio["series-part"] = str(value)
+            audio["tracknumber"] = str(value)
         elif key in MP4_CONVERT:
             audio[MP4_CONVERT[key]] = value
         elif key in audio.Get.keys():
@@ -55,6 +60,9 @@ def add_mp4_metadata(filepath: str, metadata: AudiobookMetadata):
         else:
             audio.tags.RegisterFreeformKey(key, key.capitalize()) # type: ignore
             audio[key] = value
+    # Use the book title as album. Mapping series to album makes Audiobookshelf
+    # import the series name as the title.
+    audio["album"] = metadata.title
     audio.save()
 
 
