@@ -52,7 +52,6 @@ def add_mp4_metadata(filepath: str, metadata: AudiobookMetadata):
             audio["series"] = value
         elif key == "series_order":
             audio["series-part"] = str(value)
-            audio["tracknumber"] = str(value)
         elif key in MP4_CONVERT:
             audio[MP4_CONVERT[key]] = value
         elif key in audio.Get.keys():
@@ -60,9 +59,11 @@ def add_mp4_metadata(filepath: str, metadata: AudiobookMetadata):
         else:
             audio.tags.RegisterFreeformKey(key, key.capitalize()) # type: ignore
             audio[key] = value
-    # Use the book title as album. Mapping series to album makes Audiobookshelf
-    # import the series name as the title.
-    audio["album"] = metadata.title
+    # Audiobook Organizer uses the MP4 album atom as its series fallback, while
+    # Audiobookshelf reads the explicit series/series-part freeform atoms above.
+    # Keep a useful album value for standalone books without conflating a
+    # series position with the audio track number.
+    audio["album"] = metadata.series or metadata.title
     audio.save()
 
 

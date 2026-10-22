@@ -319,12 +319,15 @@ class NextorySource(Source):
         the series lives on the top-level ``volume`` field of the book.
         """
         series = book_info.get("series")
-        if not series:
+        if not isinstance(series, dict):
             return None, None
-        name = series.get("name")
+        raw_name = series.get("name")
+        if not isinstance(raw_name, str) or not raw_name.strip():
+            return None, None
+        name = raw_name.strip()
         position = None
         raw_volume = book_info.get("volume")
-        if raw_volume is not None:
+        if raw_volume is not None and not isinstance(raw_volume, bool):
             try:
                 volume = int(raw_volume)
                 if volume > 0:
