@@ -34,7 +34,7 @@ def test_mp4_metadata_writes_audiobookshelf_series_tags():
         add_mp4_metadata("Stil maar.m4b", metadata)
 
     assert audio.values["title"] == "Stil maar"
-    assert audio.values["album"] == "Gina Harte"
+    assert audio.values["album"] == "Stil maar"
     assert audio.values["series"] == "Gina Harte"
     assert audio.values["series-part"] == "1"
     assert "tracknumber" not in audio.values

@@ -95,16 +95,18 @@ def add_metadata_to_file(audiobook: Audiobook, filepath: str, options):
     :param filepath: Filepath of output file
     :options: Cli options
     """
+    # FFmpeg rewrites the MP4 container while adding chapters and does not
+    # preserve arbitrary iTunes freeform atoms such as series/series-part.
+    # Add chapters first, then write metadata to the final container.
+    if audiobook.chapters and not options.no_chapters:
+        logging.book_update("Adding chapters")
+        metadata.add_chapters(filepath, audiobook.chapters)
     # General metadata
     logging.book_update("Adding metadata")
     metadata.add_metadata(filepath, audiobook.metadata)
     if options.write_json_metadata:
         with open(f"{filepath}.json", "w") as f:
             f.write(audiobook.metadata.as_json())
-    # Chapters
-    if audiobook.chapters and not options.no_chapters:
-        logging.book_update("Adding chapters")
-        metadata.add_chapters(filepath, audiobook.chapters)
     # Cover
     if audiobook.cover:
         logging.book_update("Embedding cover")
